@@ -17,7 +17,7 @@ import { join } from 'path';
 const controls = {
   tesselations: 5,
   'Load Scene': loadScene, // A function pointer, essentially
-  cbrtParticles: 5,
+  cbrtParticles: 10,
   elastic: false,
   CenterofMass: false,
   Gravity: 0,
@@ -104,8 +104,7 @@ function main() {
   // Initial call to load scene
   loadScene();
 
-  let n = Math.trunc(Math.cbrt(controls.cbrtParticles));
-  const camera = new Camera(vec3.fromValues(n * 4, n * 4, n * 4), vec3.fromValues(50,50,0));
+  const camera = new Camera(vec3.fromValues(controls.cbrtParticles * 8, controls.cbrtParticles * 8, controls.cbrtParticles * 8), vec3.fromValues(0,0,0));
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
