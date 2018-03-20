@@ -22,6 +22,7 @@ const controls = {
   CenterofMass: false,
   Gravity: 0,
   Mesh: 'Cube',
+  GravDown: false,
 };
 
 let square: Square;
@@ -64,9 +65,9 @@ function loadScene() {
         offsetsArray.push(pos[1]);
         offsetsArray.push(pos[2]);
 
-        colorsArray.push(i / n);
-        colorsArray.push(j / n);
-        colorsArray.push(k / n);
+        colorsArray.push(0);
+        colorsArray.push(0);
+        colorsArray.push(0);
         colorsArray.push(1.0); // Alpha channel
       }
     }
@@ -95,6 +96,7 @@ function main() {
   gui.add(controls, 'elastic');
   gui.add(controls, 'CenterofMass');
   gui.add(controls, 'Gravity', 0, 20).step(1);
+  gui.add(controls, 'GravDown');
   gui.add(controls, 'Mesh', ['None', 'Cube', 'Icosphere']);
 
 
@@ -127,7 +129,12 @@ function main() {
   function tick() {
     system.comass = controls.CenterofMass;
     system.gravconst = controls.Gravity;
-    system.gravity = vec3.scale(vec3.create(), camera.up, -1);
+    if (controls.GravDown) {
+      system.gravity = vec3.scale(vec3.create(), camera.up, -1);
+    }
+    else {
+      system.gravity = vec3.fromValues(0,-1,0);
+    }
 
     if (currentMesh != controls.Mesh) {
       if (controls.Mesh == 'None') {
@@ -149,7 +156,6 @@ function main() {
 
     let offsetsArray = [];
     let particlepos = system.update(diffTime / 10); // Get the new positions of the particles (scaled time down by 10 to slow system down)
-    //console.log(particlepos);
     let n = Math.sqrt(system.pnum);
 
     for(let i = 0; i < particlepos.length; i++) {
@@ -160,7 +166,8 @@ function main() {
       }
     
     let offsets: Float32Array = new Float32Array(offsetsArray);
-    square.setInstanceOffsets(offsets);
+    let colors: Float32Array = new Float32Array(system.getVelocities());
+    square.setInstanceVBOs(offsets, colors);
 
     camera.update();
     stats.begin();

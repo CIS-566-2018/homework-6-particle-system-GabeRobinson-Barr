@@ -119,6 +119,21 @@ class ParticleSystem {
             }
         }
     }
+
+    getVelocities () : number[] {
+        let vels: number[] = [];
+        for (let i = 0; i < this.pnum; i++) {
+            let v = vec3.scale(vec3.create(), this.particles[i].velocity, 1/10);
+            if (v[0] > 1.0 || v[1] > 1.0 || v[2] > 1.0) {
+                vec3.normalize(v,v);
+            }
+            vels.push(Math.abs(v[0]));
+            vels.push(Math.abs(v[1]));
+            vels.push(Math.abs(v[2]));
+            vels.push(1.0);
+        }
+        return vels;
+    }
     
 
 };
