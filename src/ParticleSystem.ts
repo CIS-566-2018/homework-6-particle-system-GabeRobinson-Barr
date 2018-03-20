@@ -1,5 +1,6 @@
 import Particle from './Particle'
 import {vec3, vec4} from 'gl-matrix'
+import Drawable from './rendering/gl/Drawable';
 
 class ParticleSystem {
     particles: Particle[] = []; // Array of particles in the system
@@ -10,6 +11,8 @@ class ParticleSystem {
     comass: boolean = false; // Whether center of mass attraction is activated
     minfield: vec3;
     maxfield: vec3;
+    mesh: boolean = false;
+    meshpositions: vec3[] = [];
 
     constructor (sqrtParticles: number, elastic: boolean) {
         this.pnum = sqrtParticles * sqrtParticles * sqrtParticles;
@@ -49,7 +52,25 @@ class ParticleSystem {
 
 
         for (let i = 0; i < this.pnum; i++) { // Update the location of each particle
-            let newp = this.particles[i].update(step, vec4.fromValues(sumLocation[0], sumLocation[1], sumLocation[2], sumForce), grav);
+            let tempFLoc = vec3.clone(sumLocation);
+            let tempF = sumForce;
+            if (this.mesh) {
+                let vert = Math.trunc(i * (this.meshpositions.length / this.pnum));
+                let dist = vec3.distance(this.particles[i].position, this.meshpositions[vert]);
+                if (dist < 1 &&
+                    sumForce <= (this.pnum * this.particles[i].mass)) {
+                        vec3.scale(this.particles[i].velocity, this.particles[i].velocity, 0.9);
+                }
+                else {
+                    vec3.scale(tempFLoc, tempFLoc, tempF);
+                    let newf = 100 * Math.max(dist, 0.1);
+                    vec3.add(tempFLoc, tempFLoc, vec3.scale(vec3.create(), this.meshpositions[vert], newf));
+                    tempF += newf;
+                    vec3.scale(tempFLoc, tempFLoc, 1 / tempF);
+                }
+            }
+            let f = vec4.fromValues(tempFLoc[0], tempFLoc[1], tempFLoc[2], tempF);
+            let newp = this.particles[i].update(step, f, grav);
             let calcp = vec3.clone(newp);
             vec3.max(newp, newp, this.minfield);
             vec3.min(newp, newp, this.maxfield);
@@ -82,6 +103,21 @@ class ParticleSystem {
         this.forces = newf;
 
         return newpositions;
+    }
+
+    addMesh(pos: Float32Array) {
+        if (pos.length == 0) {
+            this.mesh = false;
+            this.meshpositions = [];
+        }
+        else {
+            this.mesh = true;
+            this.meshpositions = [];
+            for (let i = 0; i < pos.length; i = i + 4) {
+                let vert = vec3.fromValues(pos[i], pos[i + 1], pos[i + 2]);
+                this.meshpositions.push(vert);
+            }
+        }
     }
     
 

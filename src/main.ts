@@ -2,6 +2,8 @@ import {vec3, vec4} from 'gl-matrix';
 import * as Stats from 'stats-js';
 import * as DAT from 'dat-gui';
 import Square from './geometry/Square';
+import Cube from './geometry/Cube';
+import Icosphere from './geometry/Icosphere';
 import OpenGLRenderer from './rendering/gl/OpenGLRenderer';
 import Camera from './Camera';
 import {setGL} from './globals';
@@ -15,21 +17,30 @@ import { join } from 'path';
 const controls = {
   tesselations: 5,
   'Load Scene': loadScene, // A function pointer, essentially
-  cbrtParticles: 20,
+  cbrtParticles: 5,
   elastic: false,
   CenterofMass: false,
   Gravity: 0,
+  Mesh: 'Cube',
 };
 
 let square: Square;
+let cube: Cube; // Using cube and Icosphere for particle attraction
+let icosphere: Icosphere;
 let time: number = 0.0;
 let system: ParticleSystem;
 let lastTime: number;
+let currentMesh = 'None';
 
 function loadScene() {
   lastTime = Date.now();
   square = new Square();
   square.create();
+
+  cube = new Cube(vec3.fromValues(0,0,0));
+  cube.create();
+  icosphere = new Icosphere(vec3.fromValues(0,0,0), 10, 6);
+  icosphere.create();
 
   // Set up particles here. Hard-coded example data for now
   let offsetsArray = [];
@@ -77,6 +88,7 @@ function main() {
   gui.add(controls, 'elastic');
   gui.add(controls, 'CenterofMass');
   gui.add(controls, 'Gravity', 0, 20).step(1);
+  gui.add(controls, 'Mesh', ['None', 'Cube', 'Icosphere']);
 
 
   // get canvas and webgl context
@@ -109,6 +121,19 @@ function main() {
   function tick() {
     system.comass = controls.CenterofMass;
     system.gravity = vec3.fromValues(0, -controls.Gravity, 0);
+
+    if (currentMesh != controls.Mesh) {
+      if (controls.Mesh == 'None') {
+        system.addMesh(new Float32Array(0));
+      }
+      else if (controls.Mesh == 'Cube') {
+        system.addMesh(cube.positions);
+      }
+      else if (controls.Mesh == 'Icosphere') {
+        system.addMesh(icosphere.positions);
+      }
+      currentMesh = controls.Mesh;
+    }
 
     // Get the difference in time between ticks for particle updating
     let currTime = Date.now();

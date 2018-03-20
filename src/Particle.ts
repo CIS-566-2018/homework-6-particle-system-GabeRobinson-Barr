@@ -6,6 +6,7 @@ class Particle {
     position: vec3 = vec3.fromValues(0,0,0);
     velocity: vec3 = vec3.fromValues(0,0,0);
     mass: number = 1; // Default mass of 1
+    friction: number = 1;
 
     constructor (origin: vec3, e: boolean) {
         this.elastic = e;
@@ -28,7 +29,8 @@ class Particle {
             vec3.add(this.velocity, this.velocity, vec3.scale(vec3.create(), eforce, step));
         }
 
-        vec3.add(this.velocity, this.velocity, vec3.fromValues(Math.sign(this.velocity[0]) * -step, Math.sign(this.velocity[1]) * -step, Math.sign(this.velocity[2]) * -step))
+        vec3.add(this.velocity, this.velocity, 
+            vec3.fromValues(Math.sign(this.velocity[0]) * -step * this.friction, Math.sign(this.velocity[1]) * -step * this.friction, Math.sign(this.velocity[2]) * -step * this.friction))
 
         // Use kinematics equations to calculate new position/velocity. Forces won't change during an update call so this should be fine
         let change = vec3.scale(vec3.create(), totalAcc, 0.5 * step * step);
