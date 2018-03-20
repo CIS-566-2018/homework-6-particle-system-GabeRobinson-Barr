@@ -1,43 +1,18 @@
 
 # Project 6: Particle System
 
-**Goal:** to make physics-based procedural animation of particles and to practice using OpenGL's instanced rendering system.
+Gabriel Robinson-Barr
 
-**Inspiration:** DMD and CGGT alumnus Nop Jiarathanakul's [Particle Dream application](http://www.iamnop.com/particles/).
+To control the particle system, you can increase the number of particles with cbrtParticles. This will set the number of particles on each side of a cube, so the total number of particles will be your input cubed.
 
-## Particle collection (30 points)
-Add whatever code you feel is necessary to your Typescript files to support a collection of particles that move over time and interact with various forces in the environment. Something like a `Particle` class could be helpful, but is not strictly necessary. At minimum, each particle should track position, velocity, and acceleration, and make use of an accurate time step value from within `main.ts`'s `tick()` function. You may use any integration method you see fit, such as Euler, Verlet, or Runge-Kutta.
+I have set up an invisible box that the particles can't move outside of. They just stop when the hit the walls. The box scales up the more particles there are in the system. Clicking inside this box will apply a force to the particles in line with where you click. Left clicking applys an attractive force to the particles, and Right clicking applys a repulsive force. For some reason on my laptop right clicking doesnt register, and I'm not sure if its because of the trackpad or its something with chrome, but just a heads up the repulsive force is mapped to mousebutton 2 whatever that happens to be on your computer. 
 
-You'll probably want to test your code on a small set of particles at first, and with some simple directional forces just to make sure your particles move
-as expected.
+Checking elastic will make each particle have a small force towards its original position. Both this and cbrtParticles need to be set, and then the scene needs to be reloaded for them to take effect.
 
-## Procedural coloration and shaping of particles (15 points)
-Your particles' colors should be determined in some procedural manner, whether it's based on velocity, time, position, or distance to target point. Your particle coloration scheme should follow one of the color palette techniques discussed in Tuesday's class so that your particle collection seems coherently colored. The shape of your particles may be whatever you wish (you're not limited to the basic gradiated circle we provided in the base code). You can even use a texture on your particle surface if you wish. Feel free to set up another instanced data VBO to vary the shape of your particles within the same scene.
+Checking CenterofMass will create a gravitational force at the center of mass of the particles. This isn't particularly accurate in simulating gravity between all the particles as far as I know, but is much faster than n^n force calculations. Also it looks nice when everything swirls around, particularly at higher particle counts. I highly reccomend leaving this on with no other forces and letting it go for a bit.
 
-## Interactive forces (25 points)
-Allow the user to click on the scene to attract and repel particles from the cursor (consider ray-casting from the clicked point to place a 3D point in the scene from which particles can flee or move towards).
+Gravity is the force of gravity. Its very hard to notice if its under 5 and particles fall pretty slowly anyway. If you check GravDown the particles will fall in the down direction relative to the camera instead of in the -y direction.
 
-You might also consider allowing the user the option of activating "force fields", i.e. invisible 3D noise functions that act as forces on the particles as they move through the scene. You might even consider implementing something like [curl noise](https://petewerner.blogspot.com/2015/02/intro-to-curl-noise.html) to move your particles. Creating a visualization of these fields by drawing small `GL_LINES` in the direction of the force every N units in the world may be helpful for determining if your code works as expected.
+Mesh lets you pick a mesh to attract the particles. Particles only attract to vertices, and the only meshes I have as options are a basic cube, and an Icosphere with 6 tessalations. If there are more verts than particles the particles will choose one vert to attract to, if there are more particles than verts each vert will attract multiple particles. When the particles get really close to the verts they slow down and stop moving. To get them moving again you just have to apply a force to them like CenterofMass or by clicking.
 
-## Mesh surface attraction (20 points)
-Give the user the option of selecting a mesh from a drop-down menu in your GUI and have a subset of your particles become attracted to points on the surface of the mesh. To start, try just having each vertex on the mesh attract one unique particle in your collection. For extra credit, try generating points on the surfaces of the mesh faces that will attract more particles. Consider this method of warping a 2D point with X, Y values in the range [0, 1) to the barycentric coordinates (u, v) of any arbitrary triangle:
-
-`(u, v) = (1 - sqrt(x), y * sqrt(x))`
-
-You can map these (u, v) coordinates to a point on any triangle using this method from `Physically Based Rendering From Theory to Implementation, Third Edition`'s chapter on triangle meshes:
-
-![](pbrt.jpg)
-
-Consider pre-generating these mesh attractor points at load time so your program runs in real time as you swap out meshes.
-
-## \~\*\~\*\~A E S T H E T I C\~\*\~\*\~ (10 points)
-As always, the artistic merit of your project plays a small role in your grade. The more interesting, varied, and procedural your project is, the higher your grade will be. Go crazy, make it vaporwave themed or something! Don't neglect the background of your scene; a static gray backdrop is pretty boring!
-
-## Extra credit (50 points max)
-* (5 - 15 points) Allow the user to place attractors and repulsors in the scene that influence the motion of the particles. The more variations of influencers you add, the more points you'll receive. Consider adding influencers that do not act uniformly in all directions, or that are not simply points in space but volumes. They should be visible in the scene in some manner.
-* (7 points) Have particles stretch along their velocity vectors to imitate motion blur.
-* (5 - 15 points) Allow particles to collide with and bounce off of obstacles in the scene. The more complex the shapes you collide particles with, the more points you'll earn.
-* (30 points) Animate a mesh and have the particles move along with the animation.
-* (15 points) Create a "flocking" mode for your scene where a smaller collection of particles moves around the environment following the [rules for flocking](https://en.wikipedia.org/wiki/Boids).
-* (15 points) Use audio to drive an attribute of your particles, whether that be color, velocity, size, shape, or something else!
-* (50 points) Create a cloth simulation mode for your scene where you attach particles to each other in a grid using infinitely stiff springs, and perform relaxation iterations over the grid each tick.
+The color scheme is just mapping the absolute value of the x,y,z component of each particle's velocity to its rgb color. There is a bit of tweaking to scale the velocities down but it is mostly untouched. If a particle isn't moving it turns a darkish grey, more specifically color (0.2,0.2,0.2) which is the lowest any of the color components can be. If a bunch of particles are overlapping each other it just looks like white because of the alpha blending, so if they are really clumped up it will be hard to tell the colors apart.
