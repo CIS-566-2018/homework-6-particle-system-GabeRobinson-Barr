@@ -3,6 +3,9 @@
 
 Gabriel Robinson-Barr
 
+link to github pages:
+https://gaberobinson-barr.github.io/homework-6-particle-system-GabeRobinson-Barr/
+
 To control the particle system, you can increase the number of particles with cbrtParticles. This will set the number of particles on each side of a cube, so the total number of particles will be your input cubed.
 
 I have set up an invisible box that the particles can't move outside of. They just stop when the hit the walls. The box scales up the more particles there are in the system. Clicking inside this box will apply a force to the particles in line with where you click. Left clicking applys an attractive force to the particles, and Right clicking applys a repulsive force. For some reason on my laptop right clicking doesnt register, and I'm not sure if its because of the trackpad or its something with chrome, but just a heads up the repulsive force is mapped to mousebutton 2 whatever that happens to be on your computer. 
