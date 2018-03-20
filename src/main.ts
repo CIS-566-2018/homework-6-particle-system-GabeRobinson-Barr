@@ -30,7 +30,7 @@ let icosphere: Icosphere;
 let time: number = 0.0;
 let system: ParticleSystem;
 let lastTime: number;
-let currentMesh = 'None';
+let currentMesh = controls.Mesh;
 
 function loadScene() {
   lastTime = Date.now();
@@ -47,6 +47,13 @@ function loadScene() {
   let colorsArray = [];
   let n = controls.cbrtParticles;
   system = new ParticleSystem(n, controls.elastic);
+  if (controls.Mesh == 'Cube') {
+    system.addMesh(cube.positions);
+  }
+  else if (controls.Mesh == 'Icosphere') {
+    system.addMesh(cube.positions);
+  }
+  
   let particlepos = system.update(0); // Get the initial positions of our particles
 
   for(let i = 0; i < n; i++) {
@@ -84,7 +91,7 @@ function main() {
   // Add controls to the gui
   const gui = new DAT.GUI();
   gui.add(controls, 'Load Scene');
-  gui.add(controls, 'cbrtParticles', 1, 50).step(1);
+  gui.add(controls, 'cbrtParticles', 1, 30).step(1); // Higher than 30x30x30 tends to tank the framerate
   gui.add(controls, 'elastic');
   gui.add(controls, 'CenterofMass');
   gui.add(controls, 'Gravity', 0, 20).step(1);
@@ -119,7 +126,8 @@ function main() {
   // This function will be called every frame
   function tick() {
     system.comass = controls.CenterofMass;
-    system.gravity = vec3.fromValues(0, -controls.Gravity, 0);
+    system.gravconst = controls.Gravity;
+    system.gravity = vec3.scale(vec3.create(), camera.up, -1);
 
     if (currentMesh != controls.Mesh) {
       if (controls.Mesh == 'None') {
@@ -243,12 +251,6 @@ function main() {
     if (valid) {
       vec3.scale(forcepos, forcepos, 0.5);
       system.forces.push(vec4.fromValues(forcepos[0], forcepos[1], forcepos[2], forcemag));
-      //console.log(dist1);
-      //console.log(p1);
-      //console.log(dist2);
-      //console.log(p2);
-      //console.log(forcepos);
-      //console.log(forcemag);
     }
 
 
