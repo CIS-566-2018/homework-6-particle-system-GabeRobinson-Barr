@@ -46,6 +46,13 @@ class Square extends Drawable {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.bufTranslate);
     gl.bufferData(gl.ARRAY_BUFFER, this.offsets, gl.STATIC_DRAW);
   }
+
+  setInstanceOffsets(offsets: Float32Array) {
+    this.offsets = offsets;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.bufTranslate);
+    gl.bufferData(gl.ARRAY_BUFFER, this.offsets, gl.STATIC_DRAW);
+  }
+  
 };
 
 export default Square;
