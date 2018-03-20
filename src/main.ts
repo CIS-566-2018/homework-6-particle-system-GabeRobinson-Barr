@@ -21,7 +21,7 @@ const controls = {
   elastic: false,
   CenterofMass: false,
   Gravity: 0,
-  Mesh: 'Cube',
+  Mesh: 'None',
   GravDown: false,
 };
 
